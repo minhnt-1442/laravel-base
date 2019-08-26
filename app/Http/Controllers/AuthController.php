@@ -1,73 +1,58 @@
 <?php
+
 namespace App\Http\Controllers;
-use Illuminate\Http\Request;
+
+use App\Services\AuthService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\User;
+use App\Http\Requests\SignUp;
+use App\Http\Requests\Login;
+
 class AuthController extends Controller
 {
+
+    /**
+     * @var AuthService
+     */
+    protected $authService;
+    
+     /**
+     * AuthController constructor.
+     * @param AuthService $authService
+     */
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     /**
      * Create user
      *
-     * @param  [string] name
-     * @param  [string] email
-     * @param  [string] password
-     * @param  [string] password_confirmation
+     * @param  SignUp $request
      * @return [string] message
      */
-    public function signup(Request $request)
+    public function signup(SignUp $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|confirmed'
-        ]);
-        $user = new User([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password)
-        ]);
-        $user->save();
+        $user = $this->authService->createUser($request);
         return response()->json([
-            'message' => 'Successfully created user!'
+            'message' => trans('auth.signupSuccess'),
+            'user' => $user,
         ], 201);
     }
 
     /**
      * Login user and create token
      *
-     * @param  [string] email
-     * @param  [string] password
-     * @param  [boolean] remember_me
+     * @param  Login $request
      * @return [string] access_token
      * @return [string] token_type
      * @return [string] expires_at
      */
-    public function login(Request $request)
+    public function login(Login $request)
     {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-            'remember_me' => 'boolean'
-        ]);
-        $credentials = request(['email', 'password']);
-        if(!Auth::attempt($credentials))
-            return response()->json([
-                'message' => 'Unauthorized'
-            ], 401);
-        $user = $request->user();
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->token;
-        if ($request->remember_me)
-            $token->expires_at = Carbon::now()->addWeeks(1);
-        $token->save();
-        return response()->json([
-            'access_token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse(
-                $tokenResult->token->expires_at
-            )->toDateTimeString()
-        ]);
+        $response = $this->authService->handleLogin($request);
+        return response()->json($response);
     }
 
     /**
@@ -75,11 +60,11 @@ class AuthController extends Controller
      *
      * @return [string] message
      */
-    public function logout(Request $request)
+    public function logout()
     {
-        $request->user()->token()->revoke();
+        Auth::user()->token()->revoke();
         return response()->json([
-            'message' => 'Successfully logged out'
+            'message' => trans('auth.logoutSuccess')
         ]);
     }
 
@@ -88,8 +73,8 @@ class AuthController extends Controller
      *
      * @return [json] user object
      */
-    public function user(Request $request)
+    public function user()
     {
-        return response()->json($request->user());
+        return response()->json(Auth::user());
     }
 }
