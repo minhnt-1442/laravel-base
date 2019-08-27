@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\BaseRequest;
 
-class Login extends BaseRequest
+class SignUpRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +24,9 @@ class Login extends BaseRequest
     public function rules()
     {
         return [
-          'email' => 'required|string|email',
-          'password' => 'required|string',
-          'remember_me' => 'boolean',
+          'name' => 'required|string',
+          'email' => 'required|string|email|unique:users',
+          'password' => 'required|string|confirmed',
         ];
     }
 }

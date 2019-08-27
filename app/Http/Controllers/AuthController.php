@@ -6,8 +6,8 @@ use App\Services\AuthService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\User;
-use App\Http\Requests\SignUp;
-use App\Http\Requests\Login;
+use App\Http\Requests\SignUpRequest;
+use App\Http\Requests\LoginRequest;
 
 class AuthController extends Controller
 {
@@ -16,7 +16,7 @@ class AuthController extends Controller
      * @var AuthService
      */
     protected $authService;
-    
+
      /**
      * AuthController constructor.
      * @param AuthService $authService
@@ -29,14 +29,15 @@ class AuthController extends Controller
     /**
      * Create user
      *
-     * @param  SignUp $request
-     * @return [string] message
+     * @param  SignUpRequest $request
+     * @return JsonResponse
      */
-    public function signup(SignUp $request)
+    public function signup(SignUpRequest $request)
     {
         $user = $this->authService->createUser($request);
+
         return response()->json([
-            'message' => trans('auth.signupSuccess'),
+            'message' => trans('auth.signup_success'),
             'user' => $user,
         ], 201);
     }
@@ -44,34 +45,34 @@ class AuthController extends Controller
     /**
      * Login user and create token
      *
-     * @param  Login $request
-     * @return [string] access_token
-     * @return [string] token_type
-     * @return [string] expires_at
+     * @param  LoginRequest $request
+     * @return JsonResponse
      */
-    public function login(Login $request)
+    public function login(LoginRequest $request)
     {
         $response = $this->authService->handleLogin($request);
+
         return response()->json($response);
     }
 
     /**
      * Logout user (Revoke the token)
      *
-     * @return [string] message
+     * @return JsonResponse
      */
     public function logout()
     {
         Auth::user()->token()->revoke();
+
         return response()->json([
-            'message' => trans('auth.logoutSuccess')
+            'message' => trans('auth.logout_success')
         ]);
     }
 
     /**
      * Get the authenticated User
      *
-     * @return [json] user object
+     * @return JsonResponse
      */
     public function user()
     {
