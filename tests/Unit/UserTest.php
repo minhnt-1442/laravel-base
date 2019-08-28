@@ -1,27 +1,28 @@
 <?php
+
 namespace Tests\Unit;
 
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\User;
 
 class UserTest extends TestCase
 {
+    use DatabaseTransactions;
+    use WithFaker;
     /**
-     * A test User model.
+     * A test Encrypt Password.
      *
      * @return void
      */
-    public function testSetPasswordReturnsTrueWhenPasswordSuccessfullySet()
+    public function testEncryptPassword()
     {
-        $details = [];
+        $user = factory(User::class)->create([
+            'password' => $password = "123456",
+        ]);
 
-        $user = new User($details);
-    
-        $password = 'fubar';
-    
-        $user->password = $password;
-    
         $this->assertNotEquals($password, $user['password']);
         $this->assertNotEmpty($user['password']);
     }

@@ -17,6 +17,7 @@ class AuthService
     public function createUser($request)
     {
         $user = User::create($request->only(['name', 'email', 'password']));
+
         return $user;
     }
 
@@ -30,16 +31,12 @@ class AuthService
      */
     public function handleLogin($request)
     {
-      $credentials = $request->only(['email', 'password']);
-      if(!Auth::attempt($credentials))
-          return response()->json([
-              'message' => trans('auth.unauthorized')
-          ], 401);
       $tokenResult = Auth::user()->createToken('Personal Access Token');
       $token = $tokenResult->token;
       if ($request->remember_me)
           $token->expires_at = Carbon::now()->addWeeks(1);
       $token->save();
+
       return [
           'access_token' => $tokenResult->accessToken,
           'token_type' => 'Bearer',
@@ -49,4 +46,3 @@ class AuthService
       ];
     }
 }
-
