@@ -4,10 +4,10 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
 use App\Http\Controllers\AuthController;
 use Tests\TestCase;
 use App\User;
-use Illuminate\Foundation\Testing\WithFaker;
 
 class UserTest extends TestCase
 {
@@ -22,7 +22,7 @@ class UserTest extends TestCase
     {
         $response = $this->json('POST', route('api.signup'), [
             'name' => $this->faker->name(),
-            'email' => $this->faker->email(),
+            'email' => 'nguyen.thanh.minh@sun-asterisk.com',
             'password' => "123456",
             'password_confirmation' => "123456",
         ]);
@@ -41,46 +41,13 @@ class UserTest extends TestCase
     /**
      * A test Signup Fail With Wrong Email.
      *
+     * @dataProvider providerTestSignupFail
      * @return void
      */
-    public function testSignupFailWithWrongEmail()
+    public function testSignupFail($userData, $responseData)
     {
-        $response = $this->json('POST', route('api.signup'), [
-            'name' => $this->faker->name(),
-            'email' => $this->faker->name(),
-            'password' => "123456",
-            'password_confirmation' => "123456",
-        ]);
-        $response->assertStatus(400)->assertJson([
-            'success' => false,
-            'error' => [
-                'code' => 622,
-                'message' => "The email must be a valid email address.",
-            ],
-        ]);
-    }
-
-    /**
-     * A test Signup Fail With Password Confirmation Not Match.
-     *
-     * @return void
-     */
-    public function testSignupFailWithPasswordConfirmationNotMatch()
-    {
-        $response = $this->json('POST', route('api.signup'), [
-            'name' => $this->faker->name(),
-            'email' => $this->faker->email(),
-            'password' => "123456",
-            'password_confirmation' => "1234567",
-        ]);
-
-        $response->assertStatus(400)->assertJson([
-            'success' => false,
-            'error' => [
-                'code' => 622,
-                'message' => "The password confirmation does not match.",
-            ],
-        ]);
+        $response = $this->json('POST', route('api.signup'), $userData);
+        $response->assertStatus(400)->assertJson($responseData);
     }
 
     /**
@@ -135,12 +102,12 @@ class UserTest extends TestCase
     public function testCannotLoginWithIncorrectEmail()
     {
         $user = factory(User::class)->create([
-            'password' => "123456",
+            'password' => $password = "123456",
         ]);
 
         $response = $this->json('POST', route('api.login'), [
             'email' => $user->email . "x",
-            'password' => '123456',
+            'password' => $password,
         ]);
 
         $response->assertStatus(401)->assertJson([
@@ -161,10 +128,46 @@ class UserTest extends TestCase
 
         $response = $this->withHeaders([
           'Authorization' => 'Bearer ' . $user->createToken('Personal Access Token')->accessToken,
-        ])->json('GET', route('api.logout'));
+        ])->json('POST', route('api.logout'));
 
         $response->assertStatus(200)->assertJson([
             "message" => "Successfully logged out",
         ]);
+    }
+
+    public function providerTestSignupFail()
+    {
+        return [
+            [
+                [
+                    'name' => "Minh",
+                    'email' => 'nguyen.thanh.minh',
+                    'password' => "123456",
+                    'password_confirmation' => "123456",
+                ],
+                [
+                    'success' => false,
+                    'error' => [
+                        'code' => 622,
+                        'message' => "The email must be a valid email address.",
+                    ],
+                ]
+            ],
+            [
+                [
+                    'name' => "Minh",
+                    'email' => 'nguyen.thanh.minh@sun-asterisk.com',
+                    'password' => "123456",
+                    'password_confirmation' => "1234567",
+                ],
+                [
+                    'success' => false,
+                    'error' => [
+                        'code' => 622,
+                        'message' => "The password confirmation does not match.",
+                    ],
+                ]
+            ]
+        ];
     }
 }

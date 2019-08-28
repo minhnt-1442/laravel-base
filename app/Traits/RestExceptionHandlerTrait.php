@@ -23,7 +23,6 @@ trait RestExceptionHandlerTrait
         if (config('APP_ENV') == 'local') {
             Log::error($e->getMessage());
         }
-
         switch (true) {
             case $this->isAuthenticationException($e):
                 $retval = $this->unauthorized();
