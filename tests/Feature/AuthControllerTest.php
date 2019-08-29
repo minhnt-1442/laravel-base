@@ -74,45 +74,18 @@ class UserTest extends TestCase
     }
 
     /**
-     * A test Cannot Login With Incorrect Password.
+     * A test Login Fail.
      *
+     * @dataProvider providerTestLoginFail
      * @return void
      */
-    public function testCannotLoginWithIncorrectPassword()
+    public function testLoginFail($dataUser, $dataLogin, $dataResponse)
     {
-        $user = factory(User::class)->create([
-            'password' => "123456",
-        ]);
+        $user = factory(User::class)->create($dataUser);
 
-        $response = $this->json('POST', route('api.login'), [
-            'email' => $user->email,
-            'password' => 'invalid-password',
-        ]);
+        $response = $this->json('POST', route('api.login'), $dataLogin);
 
-        $response->assertStatus(401)->assertJson([
-            "message" => "Unauthorized",
-        ]);
-    }
-
-    /**
-     * A test Cannot Login With Incorrect Email.
-     *
-     * @return void
-     */
-    public function testCannotLoginWithIncorrectEmail()
-    {
-        $user = factory(User::class)->create([
-            'password' => $password = "123456",
-        ]);
-
-        $response = $this->json('POST', route('api.login'), [
-            'email' => $user->email . "x",
-            'password' => $password,
-        ]);
-
-        $response->assertStatus(401)->assertJson([
-            "message" => "Unauthorized",
-        ]);
+        $response->assertStatus(400)->assertJson($dataResponse);
     }
 
     /**
@@ -166,6 +139,48 @@ class UserTest extends TestCase
                         'code' => 622,
                         'message' => "The password confirmation does not match.",
                     ],
+                ]
+            ]
+        ];
+    }
+
+    public function providerTestLoginFail()
+    {
+        return [
+            [
+                [
+                    'name' => "Minh",
+                    'email' => 'nguyen.thanh.minh1@sun-asterisk.com',
+                    'password' => "123456",
+                ],
+                [
+                    'email' => 'nguyen.thanh.minh@sun.com',
+                    'password' => "123456",
+                ],
+                [
+                    "success" => false,
+                    "error" => [
+                        "code" => 601,
+                        "message" => "Unauthorized, please check your credentials."
+                    ]
+                ]
+            ],
+            [
+                [
+                    'name' => "Minh",
+                    'email' => 'nguyen.thanh.minh1@sun-asterisk.com',
+                    'password' => "123456",
+                ],
+                [
+                    'email' => 'nguyen.thanh.minh1@sun-asterisk.com',
+                    'password' => "1234567",
+                ],
+                [
+                    "success" => false,
+                    "error" => [
+                        "code" => 601,
+                        "message" => "Unauthorized, please check your credentials."
+                    ]
                 ]
             ]
         ];

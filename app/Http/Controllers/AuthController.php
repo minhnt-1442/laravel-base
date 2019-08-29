@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\User;
 use App\Http\Requests\SignUpRequest;
 use App\Http\Requests\LoginRequest;
+use Illuminate\Auth\AuthenticationException;
 
 class AuthController extends Controller
 {
@@ -51,9 +52,7 @@ class AuthController extends Controller
     {
         $credentials = $request->only(['email', 'password']);
         if(!Auth::attempt($credentials)) {
-            return response()->json([
-                'message' => trans('auth.unauthorized')
-            ], 401);
+          throw new AuthenticationException();
         }
         $response = $this->authService->handleLogin($request);
 

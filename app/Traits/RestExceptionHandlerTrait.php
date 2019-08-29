@@ -20,6 +20,7 @@ trait RestExceptionHandlerTrait
      */
     protected function getJsonResponseForException(Exception $e)
     {
+        // dd($this->isAuthenticationException($e));
         if (config('APP_ENV') == 'local') {
             Log::error($e->getMessage());
         }
