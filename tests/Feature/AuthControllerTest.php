@@ -2,44 +2,45 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use App\Http\Controllers\AuthController;
-use Tests\TestCase;
 use App\User;
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class UserTest extends TestCase
 {
     use DatabaseTransactions;
     use WithFaker;
     /**
-     * A test Signup Success.
-     *
-     * @return void
+     * A test signup success.
      */
     public function testSignupSuccess()
     {
+        $password = $this->faker->password();
+        $name = $this->faker->name();
+        $email = $this->faker->safeEmail;
         $response = $this->json('POST', route('api.signup'), [
-            'name' => $this->faker->name(),
-            'email' => 'nguyen.thanh.minh@sun-asterisk.com',
-            'password' => "123456",
-            'password_confirmation' => "123456",
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+            'password_confirmation' => $password,
         ]);
+        $user = User::latest()->first();
         $response->assertStatus(201)->assertJson([
             'message' => 'Successfully created user!',
             'user' => [
-                'name' => User::latest()->first()->name,
-                'email' => User::latest()->first()->email,
-                'updated_at' => User::latest()->first()->updated_at,
-                'created_at' => User::latest()->first()->created_at,
-                'id' => User::latest()->first()->id,
+                'name' => $name,
+                'email' => $email,
+                'updated_at' => $user->updated_at,
+                'created_at' => $user->created_at,
+                'id' => $user->id,
             ],
         ]);
     }
 
     /**
-     * A test Signup Fail With Wrong Email.
+     * A test signup fail with wrong email.
      *
      * @dataProvider providerTestSignupFail
      * @return void
@@ -51,18 +52,21 @@ class UserTest extends TestCase
     }
 
     /**
-     * A test Login Success.
+     * A test login success.
      *
      * @return void
      */
     public function testLoginSuccess()
     {
+        $email = $this->faker->safeEmail;
+        $password = $this->faker->password;
         $user = factory(User::class)->create([
-            'password' => $password = "123456",
+            'email' => $email,
+            'password' => $password,
         ]);
 
         $response = $this->json('POST', route('api.login'), [
-            'email' => $user->email,
+            'email' => $email,
             'password' => $password,
         ]);
 
@@ -74,14 +78,13 @@ class UserTest extends TestCase
     }
 
     /**
-     * A test Login Fail.
-     *
+     * A test login fail.
      * @dataProvider providerTestLoginFail
      * @return void
      */
     public function testLoginFail($dataUser, $dataLogin, $dataResponse)
     {
-        $user = factory(User::class)->create($dataUser);
+        factory(User::class)->create($dataUser);
 
         $response = $this->json('POST', route('api.login'), $dataLogin);
 
@@ -89,7 +92,7 @@ class UserTest extends TestCase
     }
 
     /**
-     * A test Logout Success.
+     * A test logout success.
      *
      * @return void
      */
@@ -108,6 +111,11 @@ class UserTest extends TestCase
         ]);
     }
 
+    /**
+     * A provider test signup fail.
+     *
+     * @return array
+     */
     public function providerTestSignupFail()
     {
         return [
@@ -144,6 +152,11 @@ class UserTest extends TestCase
         ];
     }
 
+    /**
+     * A provider test login fail.
+     *
+     * @return array
+     */
     public function providerTestLoginFail()
     {
         return [

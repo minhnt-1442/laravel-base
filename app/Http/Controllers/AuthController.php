@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\AuthService;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use App\User;
-use App\Http\Requests\SignUpRequest;
+use Carbon\Carbon;
+use App\Services\AuthService;
 use App\Http\Requests\LoginRequest;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\SignUpRequest;
 use Illuminate\Auth\AuthenticationException;
 
 class AuthController extends Controller

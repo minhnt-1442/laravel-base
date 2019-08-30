@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use App\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class AuthService
 {
