@@ -4,12 +4,12 @@ namespace Tests\Unit;
 
 use App\User;
 use Tests\TestCase;
+use App\Services\AuthService;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\SignUpRequest;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use App\Services\AuthService;
-use App\Http\Requests\SignUpRequest;
-use App\Http\Requests\LoginRequest;
-use Illuminate\Foundation\Testing\WithFaker;
 
 class AuthServiceTest extends TestCase
 {
@@ -29,7 +29,6 @@ class AuthServiceTest extends TestCase
         parent::setUp();
         $this->authService = new AuthService();
     }
-  
 
     /**
      * A test create user
@@ -48,7 +47,7 @@ class AuthServiceTest extends TestCase
           'email' => $email,
           'password' => $password
         ]);
-      
+
         $response = $this->authService->createUser($request);
 
         $this->assertInstanceOf(User::class, $response);
@@ -75,8 +74,8 @@ class AuthServiceTest extends TestCase
           'email' => $email,
           'password' => $password,
         ]);
-      
-        $response = $this->authService->handleLogin($request);
+
+        $response = $this->actingAs($user)->authService->handleLogin($request);
 
         $this->assertIsArray($response);
         $this->assertArrayHasKey('access_token', $response);

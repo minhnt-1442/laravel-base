@@ -79,7 +79,9 @@ class UserTest extends TestCase
 
     /**
      * A test login fail.
+     *
      * @dataProvider providerTestLoginFail
+     *
      * @return void
      */
     public function testLoginFail($dataUser, $dataLogin, $dataResponse)
@@ -155,6 +157,7 @@ class UserTest extends TestCase
     /**
      * A provider test login fail.
      *
+     * @expectedException LaravelBaseApiException
      * @return array
      */
     public function providerTestLoginFail()

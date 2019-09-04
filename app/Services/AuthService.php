@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\User;
+use App\Models\Role;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +17,7 @@ class AuthService
      */
     public function createUser($request)
     {
-        $user = User::create($request->only(['name', 'email', 'password']));
+        $user = User::create($request->only(['name', 'email', 'password']))->assignRole(Role::MEMBER);
 
         return $user;
     }
@@ -31,19 +32,19 @@ class AuthService
      */
     public function handleLogin($request)
     {
-      $tokenResult = Auth::user()->createToken('Personal Access Token');
-      $token = $tokenResult->token;
-      if ($request->remember_me) {
-          $token->expires_at = Carbon::now()->addWeeks(1);
-      }
-      $token->save();
+        $tokenResult = Auth::user()->createToken('Personal Access Token');
+        $token = $tokenResult->token;
+        if ($request->remember_me) {
+            $token->expires_at = Carbon::now()->addWeeks(1);
+        }
+        $token->save();
 
-      return [
-          'access_token' => $tokenResult->accessToken,
-          'token_type' => 'Bearer',
-          'expires_at' => Carbon::parse(
-              $tokenResult->token->expires_at
-          )->toDateTimeString()
-      ];
+        return [
+            'access_token' => $tokenResult->accessToken,
+            'token_type' => 'Bearer',
+            'expires_at' => Carbon::parse(
+                $tokenResult->token->expires_at
+            )->toDateTimeString()
+        ];
     }
 }

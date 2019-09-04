@@ -8,7 +8,7 @@ use App\Services\AuthService;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\SignUpRequest;
-use Illuminate\Auth\AuthenticationException;
+use App\Exceptions\LaravelBaseApiException;
 
 class AuthController extends Controller
 {
@@ -52,7 +52,7 @@ class AuthController extends Controller
     {
         $credentials = $request->only(['email', 'password']);
         if(!Auth::attempt($credentials)) {
-          throw new AuthenticationException();
+          throw new LaravelBaseApiException('unauthorized');
         }
         $response = $this->authService->handleLogin($request);
 
@@ -71,15 +71,5 @@ class AuthController extends Controller
         return response()->json([
             'message' => trans('auth.logout_success')
         ]);
-    }
-
-    /**
-     * Get the authenticated User
-     *
-     * @return JsonResponse
-     */
-    public function user()
-    {
-        return response()->json(Auth::user());
     }
 }

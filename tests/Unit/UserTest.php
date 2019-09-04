@@ -2,11 +2,12 @@
 
 namespace Tests\Unit;
 
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use App\User;
+use Tests\TestCase;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class UserTest extends TestCase
 {
@@ -23,7 +24,6 @@ class UserTest extends TestCase
             'password' => $password = "123456",
         ]);
 
-        $this->assertNotEquals($password, $user['password']);
-        $this->assertNotEmpty($user['password']);
+        $this->assertTrue(Hash::check('123456', $user['password']));
     }
 }
