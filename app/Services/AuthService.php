@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use Mail;
+use Auth;
 use App\User;
 use App\Models\Role;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
+use App\Mail\RegisterSuccessMailable;
+use App\Jobs\RegistedUserMail;
 
 class AuthService
 {
@@ -18,6 +21,8 @@ class AuthService
     public function createUser($request)
     {
         $user = User::create($request->only(['name', 'email', 'password']))->assignRole(Role::MEMBER);
+
+        RegistedUserMail::dispatch($user);
 
         return $user;
     }
