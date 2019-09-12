@@ -30,4 +30,7 @@ Route::group([
     'middleware' => 'auth:api'
 ], function() {
     Route::resource('users', 'UserController');
+    Route::resource('items', 'ItemsController')->only([
+        'index', 'store', 'destroy'
+    ]);;
 });
